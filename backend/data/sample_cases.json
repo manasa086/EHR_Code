@@ -1,0 +1,429 @@
+[
+  {
+    "id": "case_001",
+    "label": "Case 001 \u2014 Abdominal hernia Patient",
+    "description": "67-year-old patient with Abdominal hernia, Esophageal reflux, Hypertensive Chronic Kidney Disease. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 67,
+      "conditions": [
+        "Abdominal hernia",
+        "Esophageal reflux",
+        "Hypertensive Chronic Kidney Disease",
+        "Spinal stenosis",
+        "Thyroid disorder"
+      ],
+      "recent_labs": {
+        "Anion Gap": 2.0,
+        "Bicarbonate": 30.0
+      }
+    },
+    "sources": [
+      {
+        "system": "Hospital EHR",
+        "medication": "Metformin 1000mg twice daily",
+        "last_updated": "2024-10-15",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Metformin 500mg twice daily",
+        "last_updated": "2025-01-20",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Metformin 1000mg daily",
+        "last_filled": "2025-01-25",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient A",
+      "dob": "1958-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Sulfonamides",
+      "Iodine"
+    ],
+    "vital_signs": {
+      "blood_pressure": "138/86",
+      "heart_rate": 74
+    },
+    "last_updated": "2025-01-25"
+  },
+  {
+    "id": "case_002",
+    "label": "Case 002 \u2014 Type 2 Diabetes Mellitus Patient",
+    "description": "67-year-old patient with Type 2 Diabetes Mellitus, Atrial Flutter, Unstable Angina. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 67,
+      "conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Atrial Flutter",
+        "Unstable Angina",
+        "Essential Hypertension",
+        "Coronary Artery Disease"
+      ],
+      "recent_labs": {
+        "Anion Gap": 1.0,
+        "Bicarbonate": 26.0,
+        "Chloride": 103.0,
+        "Ionized Ca": 1.05,
+        "Glucose": 159.0
+      }
+    },
+    "sources": [
+      {
+        "system": "Hospital EHR",
+        "medication": "Rivaroxaban 20mg daily",
+        "last_updated": "2025-01-05",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Apixaban 5mg twice daily",
+        "last_updated": "2025-02-14",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Rivaroxaban 15mg daily",
+        "last_filled": "2025-02-20",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient B",
+      "dob": "1958-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Aspirin",
+      "NSAIDs"
+    ],
+    "vital_signs": {
+      "blood_pressure": "145/90",
+      "heart_rate": 78
+    },
+    "last_updated": "2025-02-20"
+  },
+  {
+    "id": "case_003",
+    "label": "Case 003 \u2014 Lymphoma / Hematologic malignancy Patient",
+    "description": "65-year-old patient with Lymphoma / Hematologic malignancy, Atrial Fibrillation, Coronary Artery Disease. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 65,
+      "conditions": [
+        "Lymphoma / Hematologic malignancy",
+        "Atrial Fibrillation",
+        "Coronary Artery Disease",
+        "Type 2 Diabetes Mellitus",
+        "Fluid/electrolyte disorder"
+      ],
+      "recent_labs": {
+        "Anion Gap": 1.0,
+        "Bicarbonate": 13.0,
+        "Chloride": 106.0,
+        "Ionized Ca": 1.07,
+        "Glucose": 75.0
+      }
+    },
+    "sources": [
+      {
+        "system": "Hospital EHR",
+        "medication": "Warfarin 5mg daily",
+        "last_updated": "2025-01-10",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Cardiology Clinic",
+        "medication": "Warfarin 7.5mg daily",
+        "last_updated": "2025-02-18",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Warfarin 5mg daily",
+        "last_filled": "2025-03-01",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient C",
+      "dob": "1960-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Aspirin",
+      "Iodine Contrast"
+    ],
+    "vital_signs": {
+      "blood_pressure": "130/85",
+      "heart_rate": 72
+    },
+    "last_updated": "2025-03-01"
+  },
+  {
+    "id": "case_004",
+    "label": "Case 004 \u2014 Heart Failure, unspecified Patient",
+    "description": "45-year-old patient with Heart Failure, unspecified, Pulmonary edema, Pericardial disease / Atrial flutter. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 45,
+      "conditions": [
+        "Heart Failure, unspecified",
+        "Pulmonary edema",
+        "Pericardial disease / Atrial flutter",
+        "Hyperkalemia",
+        "Pericarditis"
+      ],
+      "recent_labs": {
+        "eGFR": 75
+      }
+    },
+    "sources": [
+      {
+        "system": "Hospital EHR",
+        "medication": "Furosemide 80mg IV daily",
+        "last_updated": "2025-02-22",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Furosemide 40mg oral daily",
+        "last_updated": "2025-01-30",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Torsemide 20mg oral daily",
+        "last_filled": "2025-02-01",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient D",
+      "dob": "1980-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Carbamazepine",
+      "Penicillin"
+    ],
+    "vital_signs": {
+      "blood_pressure": "115/72",
+      "heart_rate": 58
+    },
+    "last_updated": "2025-02-22"
+  },
+  {
+    "id": "case_005",
+    "label": "Case 005 \u2014 Secondary malignant neoplasm Patient",
+    "description": "47-year-old patient with Secondary malignant neoplasm, Cholangiocarcinoma, Atrial Fibrillation. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 47,
+      "conditions": [
+        "Secondary malignant neoplasm",
+        "Cholangiocarcinoma",
+        "Atrial Fibrillation",
+        "Essential Hypertension",
+        "Other lipid storage disorder"
+      ],
+      "recent_labs": {
+        "eGFR": 75
+      }
+    },
+    "sources": [
+      {
+        "system": "Emergency Room",
+        "medication": "Azithromycin 500mg daily x5d",
+        "last_updated": "2025-03-10",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Amoxicillin-Clavulanate 875mg bid x7d",
+        "last_updated": "2025-03-12",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Azithromycin 500mg daily",
+        "last_filled": "2025-03-10",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient E",
+      "dob": "1978-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Penicillin",
+      "Codeine"
+    ],
+    "vital_signs": {
+      "blood_pressure": "110/70",
+      "heart_rate": 102
+    },
+    "last_updated": "2025-03-12"
+  },
+  {
+    "id": "case_006",
+    "label": "Case 006 \u2014 Supraventricular Tachycardia Patient",
+    "description": "58-year-old patient with Supraventricular Tachycardia, Diabetic Retinopathy, Type 2 Diabetes Mellitus. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 58,
+      "conditions": [
+        "Supraventricular Tachycardia",
+        "Diabetic Retinopathy",
+        "Type 2 Diabetes Mellitus",
+        "Coronary Artery Disease",
+        "Atrial Fibrillation"
+      ],
+      "recent_labs": {
+        "Anion Gap": 1.0,
+        "Bicarbonate": 26.0,
+        "Chloride": 102.0,
+        "Ionized Ca": 1.12,
+        "Glucose": 149.0
+      }
+    },
+    "sources": [
+      {
+        "system": "Hospital EHR",
+        "medication": "Metoprolol 25mg twice daily",
+        "last_updated": "2025-01-18",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Cardiology Clinic",
+        "medication": "Diltiazem 120mg daily",
+        "last_updated": "2025-02-05",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Metoprolol 50mg twice daily",
+        "last_filled": "2025-02-10",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient F",
+      "dob": "1967-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Sulfonamides",
+      "Contrast Dye"
+    ],
+    "vital_signs": {
+      "blood_pressure": "128/82",
+      "heart_rate": 88
+    },
+    "last_updated": "2025-02-10"
+  },
+  {
+    "id": "case_007",
+    "label": "Case 007 \u2014 Abdominal condition Patient",
+    "description": "44-year-old patient with Abdominal condition, GI complication, Post-surgical complication. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 44,
+      "conditions": [
+        "Abdominal condition",
+        "GI complication",
+        "Post-surgical complication",
+        "Injury due to medical device",
+        "Intestinal obstruction / Ileus"
+      ],
+      "recent_labs": {
+        "eGFR": 75
+      }
+    },
+    "sources": [
+      {
+        "system": "Surgery EHR",
+        "medication": "Oxycodone 5mg every 6h PRN",
+        "last_updated": "2025-03-08",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Tramadol 50mg every 8h PRN",
+        "last_updated": "2025-03-02",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Oxycodone 10mg every 6h PRN",
+        "last_filled": "2025-03-09",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient G",
+      "dob": "1981-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Morphine",
+      "Cephalosporins"
+    ],
+    "vital_signs": {
+      "blood_pressure": "122/78",
+      "heart_rate": 95
+    },
+    "last_updated": "2025-03-09"
+  },
+  {
+    "id": "case_008",
+    "label": "Case 008 \u2014 Acute anterior STEMI Patient",
+    "description": "48-year-old patient with Acute anterior STEMI, GERD, Peripheral Arterial Disease. Conflicting medication records across 3 systems.",
+    "patient_context": {
+      "age": 48,
+      "conditions": [
+        "Acute anterior STEMI",
+        "GERD",
+        "Peripheral Arterial Disease"
+      ],
+      "recent_labs": {
+        "eGFR": 75
+      }
+    },
+    "sources": [
+      {
+        "system": "Cardiology Clinic",
+        "medication": "Aspirin 81mg + Ticagrelor 90mg bid",
+        "last_updated": "2025-03-01",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Primary Care",
+        "medication": "Aspirin 81mg + Clopidogrel 75mg daily",
+        "last_updated": "2025-02-10",
+        "source_reliability": "high"
+      },
+      {
+        "system": "Pharmacy",
+        "medication": "Aspirin 81mg + Clopidogrel 75mg daily",
+        "last_filled": "2025-03-05",
+        "source_reliability": "medium"
+      }
+    ],
+    "demographics": {
+      "name": "Patient H",
+      "dob": "1977-01-01",
+      "gender": "M"
+    },
+    "allergies": [
+      "Heparin",
+      "Ibuprofen"
+    ],
+    "vital_signs": {
+      "blood_pressure": "132/84",
+      "heart_rate": 68
+    },
+    "last_updated": "2025-03-05"
+  }
+]

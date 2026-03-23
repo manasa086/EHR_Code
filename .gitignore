@@ -1,0 +1,46 @@
+# Files and folders starting with '.'
+.*
+
+# Files and folders starting with '_'
+_*
+
+# Keep these dot files explicitly
+!.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Node / Frontend
+node_modules/
+dist/
+.npm/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# User-created cases (runtime data, not source — lives in Docker named volume)
+backend/data/user_cases.json
+
+# Test / coverage output
+htmlcov/
+coverage.xml
+*.log
+
+# Frontend build output
+frontend/dist/

@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ehr-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env          # API_KEY, ANTHROPIC_API_KEY, USE_MOCK_AI
+    environment:
+      - USER_DATA_DIR=/app/userdata   # named volume path — never touches host filesystem
+    volumes:
+      - ./backend/data:/app/data      # bind mount: sample_cases.json & OMOP files (host ↔ container)
+      - user_cases_vol:/app/userdata  # named volume: user_cases.json (container only)
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE: http://localhost:8000/api
+        VITE_API_KEY: dev-secret-key
+    container_name: ehr-frontend
+    ports:
+      - "5173:80"               # keep the same port the dev server used
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  user_cases_vol:   # Docker-managed volume — stored in Docker's internal storage, not on host
