@@ -501,12 +501,14 @@ export default function CasesPage() {
     setSaveError(null);
     try {
       const payload = formToCase(form, editingId === "new" ? null : editingId);
-      let saved;
       if (editingId === "new") {
-        saved = await createCase(payload);
-        setCases((prev) => [...prev, saved]);
+        await createCase(payload);
+        // Do not manually update state here — the SSE case_created event
+        // is broadcast by the backend immediately after creation and will
+        // add the case via the useSSE listener. Adding it here too causes
+        // a duplicate because the SSE event arrives before this setState runs.
       } else {
-        saved = await updateCase(editingId, payload);
+        const saved = await updateCase(editingId, payload);
         setCases((prev) => prev.map((c) => (c.id === editingId ? saved : c)));
       }
       setEditingId(null);
