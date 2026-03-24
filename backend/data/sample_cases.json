@@ -37,6 +37,11 @@
         "source_reliability": "medium"
       }
     ],
+    "medications": [
+      "Metformin 1000mg twice daily",
+      "Metformin 500mg twice daily",
+      "Metformin 1000mg daily"
+    ],
     "demographics": {
       "name": "Patient A",
       "dob": "1958-01-01",
@@ -92,6 +97,11 @@
         "last_filled": "2025-02-20",
         "source_reliability": "medium"
       }
+    ],
+    "medications": [
+      "Rivaroxaban 20mg daily",
+      "Apixaban 5mg twice daily",
+      "Rivaroxaban 15mg daily"
     ],
     "demographics": {
       "name": "Patient B",
@@ -149,6 +159,10 @@
         "source_reliability": "medium"
       }
     ],
+    "medications": [
+      "Warfarin 5mg daily",
+      "Warfarin 7.5mg daily"
+    ],
     "demographics": {
       "name": "Patient C",
       "dob": "1960-01-01",
@@ -201,6 +215,11 @@
         "source_reliability": "medium"
       }
     ],
+    "medications": [
+      "Furosemide 80mg IV daily",
+      "Furosemide 40mg oral daily",
+      "Torsemide 20mg oral daily"
+    ],
     "demographics": {
       "name": "Patient D",
       "dob": "1980-01-01",
@@ -252,6 +271,11 @@
         "last_filled": "2025-03-10",
         "source_reliability": "medium"
       }
+    ],
+    "medications": [
+      "Azithromycin 500mg daily x5d",
+      "Amoxicillin-Clavulanate 875mg bid x7d",
+      "Azithromycin 500mg daily"
     ],
     "demographics": {
       "name": "Patient E",
@@ -309,6 +333,11 @@
         "source_reliability": "medium"
       }
     ],
+    "medications": [
+      "Metoprolol 25mg twice daily",
+      "Diltiazem 120mg daily",
+      "Metoprolol 50mg twice daily"
+    ],
     "demographics": {
       "name": "Patient F",
       "dob": "1967-01-01",
@@ -361,6 +390,11 @@
         "source_reliability": "medium"
       }
     ],
+    "medications": [
+      "Oxycodone 5mg every 6h PRN",
+      "Tramadol 50mg every 8h PRN",
+      "Oxycodone 10mg every 6h PRN"
+    ],
     "demographics": {
       "name": "Patient G",
       "dob": "1981-01-01",
@@ -410,6 +444,10 @@
         "last_filled": "2025-03-05",
         "source_reliability": "medium"
       }
+    ],
+    "medications": [
+      "Aspirin 81mg + Ticagrelor 90mg bid",
+      "Aspirin 81mg + Clopidogrel 75mg daily"
     ],
     "demographics": {
       "name": "Patient H",

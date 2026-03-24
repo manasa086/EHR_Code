@@ -29,20 +29,24 @@ def test_confidence_score_is_within_valid_range():
     assert 0.0 <= result["confidence_score"] <= 1.0
 
 
-def test_safety_check_flags_metformin_with_very_low_egfr():
+def test_safety_check_always_needs_review_in_fallback():
+    # The rule-based fallback cannot assess clinical safety accurately across
+    # arbitrary lab names and medications, so it always returns NEEDS_REVIEW.
+    # Real safety assessment is done exclusively by Claude from raw patient data.
     result = _mock_reconcile(make_request(
         sources=[{"system": "Clinic", "medication": "Metformin 1000mg", "last_updated": "2025-01-01", "source_reliability": "high"}],
         labs={"eGFR": 25},
     ))
     assert result["clinical_safety_check"] == "NEEDS_REVIEW"
-    assert any("eGFR" in a or "contraindicated" in a.lower() for a in result["recommended_actions"])
 
 
-def test_safety_check_passes_for_non_renal_medication():
+def test_safety_check_needs_review_for_any_medication():
+    # Regardless of medication type, the fallback returns NEEDS_REVIEW — it has
+    # no way to reliably determine safety without Claude's clinical reasoning.
     result = _mock_reconcile(make_request([
         {"system": "Clinic", "medication": "Lisinopril 10mg", "last_updated": "2025-01-01", "source_reliability": "high"},
     ]))
-    assert result["clinical_safety_check"] == "PASSED"
+    assert result["clinical_safety_check"] == "NEEDS_REVIEW"
 
 
 def test_response_contains_all_required_fields():

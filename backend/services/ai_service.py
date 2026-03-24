@@ -33,7 +33,6 @@ def _parse_date(date_str: Optional[str]) -> Optional[datetime]:
 
 def _mock_reconcile(request_data: dict) -> dict:
     sources = request_data["sources"]
-    patient = request_data["patient_context"]
 
     # Score each source by recency × reliability
     def score(s):
@@ -71,18 +70,16 @@ def _mock_reconcile(request_data: dict) -> dict:
     for system in conflicting:
         actions.append(f"Update {system} record to: {best['medication']}")
 
-    # Safety check using patient context
-    safety = "PASSED"
-    egfr = (patient.get("recent_labs") or {}).get("eGFR")
-
-    if egfr and "metformin" in best["medication"].lower():
-        if egfr < 30:
-            safety = "NEEDS_REVIEW"
-            base_confidence -= 0.10
-            actions.append("Metformin contraindicated with eGFR < 30 — consult prescriber immediately")
-        elif egfr <= 45:
-            reasoning += f"Patient eGFR {egfr} — dose reduction may be warranted; verify with prescriber."
-            actions.append("Verify Metformin dose is appropriate given eGFR level")
+    # Safety check — the rule-based engine cannot perform accurate clinical safety
+    # assessments. recent_labs can contain any lab values (e.g. "INR", "eGFR",
+    # "Anion Gap", "Bicarbonate", "Glucose", "Ionized Ca", "Chloride", and many
+    # others). Medication names are also not normalised across systems. Hardcoding
+    # checks for any specific lab key or drug name would silently miss every other
+    # combination and produce misleading PASSED results for cases it cannot handle.
+    # This result is a fallback only (returned when Claude is unavailable).
+    # Real safety assessment — across all lab values and all medications — is
+    # performed exclusively by Claude from the raw patient data.
+    safety = "NEEDS_REVIEW"
 
     return {
         "reconciled_medication": best["medication"],
@@ -220,31 +217,15 @@ def _mock_data_quality(request_data: dict) -> dict:
         issues.append({"field": "last_updated", "issue": "No last updated date provided", "severity": "medium"})
 
     # --- Clinical Plausibility ---
-    clinical_plausibility = 100
-    conditions = [c.lower() for c in (request_data.get("conditions") or [])]
-    meds = [m.lower() for m in (request_data.get("medications") or [])]
-
-    diabetes_meds = ["metformin", "insulin", "glipizide", "jardiance", "ozempic", "glimepiride"]
-    if "type 2 diabetes" in conditions:
-        if not any(dm in m for dm in diabetes_meds for m in meds):
-            clinical_plausibility -= 20
-            issues.append({
-                "field": "medications",
-                "issue": "Type 2 Diabetes diagnosed but no diabetes medications listed",
-                "severity": "medium",
-            })
-
-    hypertension_meds = ["lisinopril", "amlodipine", "metoprolol", "losartan", "hydrochlorothiazide"]
-    if "hypertension" in conditions:
-        if not any(hm in m for hm in hypertension_meds for m in meds):
-            clinical_plausibility -= 15
-            issues.append({
-                "field": "medications",
-                "issue": "Hypertension diagnosed but no antihypertensive medications listed",
-                "severity": "medium",
-            })
-
-    clinical_plausibility = max(0, clinical_plausibility)
+    # The rule-based engine cannot assess clinical plausibility accurately.
+    # Conditions can be anything — "Atrial Fibrillation", "CKD", "COPD",
+    # "Hypothyroidism", "Depression", etc. — each requiring different expected
+    # medications. Hardcoding checks for any specific condition/medication pair
+    # would silently score every other combination as 100 (falsely plausible).
+    # This result is a fallback only (returned when Claude is unavailable).
+    # Real clinical plausibility assessment — across all conditions and medications
+    # — is performed exclusively by Claude from the raw patient record.
+    clinical_plausibility = 50
 
     overall = int((completeness + accuracy + timeliness + clinical_plausibility) / 4)
 
@@ -262,25 +243,21 @@ def _mock_data_quality(request_data: dict) -> dict:
 
 # ── Claude: enhance rule-based result with clinical reasoning ─────────────────
 
-async def _claude_enhance(request_data: dict, rule_based: dict) -> dict:
+async def _claude_enhance(request_data: dict) -> dict:
     api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is required when USE_MOCK_AI=false")
     print("[ai_service] Calling Anthropic Claude API...")
-    print("[ai_service] Input data:", json.dumps({
-        "patient_data": request_data,
-        "rule_based_pre_assessment": {k: v for k, v in rule_based.items() if k != "confidence_score"},
-    }, indent=2))
 
     system_prompt = RECONCILIATION_SYSTEM_PROMPT
 
-    # Strip confidence_score so Claude determines it independently
-    rule_based_without_score = {k: v for k, v in rule_based.items() if k != "confidence_score"}
+    # Send only raw patient data — no rule-based pre-assessment.
+    # Rule-based output is kept as a silent fallback only (used if Claude fails entirely).
+    # Sending rule-based results would anchor Claude to hardcoded rules that assume
+    # specific lab names and medication patterns, producing wrong results for other cases.
+    user_message = json.dumps({"patient_data": request_data}, indent=2)
 
-    user_message = json.dumps({
-        "patient_data": request_data,
-        "rule_based_pre_assessment": rule_based_without_score,
-    }, indent=2)
+    print("[ai_service] Input data:", user_message)
 
     payload = {
         "model": os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
@@ -323,14 +300,14 @@ async def _claude_enhance(request_data: dict, rule_based: dict) -> dict:
     print("[ai_service] Claude JSON to parse:", content)
     parsed = json.loads(content)
     print("[ai_service] Claude parsed result:", parsed)
-    confidence = float(parsed.get("confidence_score", rule_based["confidence_score"]))
+    confidence = float(parsed["confidence_score"])
 
     return {
-        "reconciled_medication": str(parsed.get("reconciled_medication", rule_based["reconciled_medication"])),
+        "reconciled_medication": str(parsed["reconciled_medication"]),
         "confidence_score": round(max(0.0, min(1.0, confidence)), 2),
-        "reasoning": str(parsed.get("reasoning", rule_based["reasoning"])),
-        "recommended_actions": [str(x) for x in parsed.get("recommended_actions", rule_based["recommended_actions"])],
-        "clinical_safety_check": str(parsed.get("clinical_safety_check", rule_based["clinical_safety_check"])),
+        "reasoning": str(parsed["reasoning"]),
+        "recommended_actions": [str(x) for x in parsed["recommended_actions"]],
+        "clinical_safety_check": str(parsed["clinical_safety_check"]),
     }
 
 
@@ -347,7 +324,7 @@ async def reconcile_medication(request_data: dict) -> dict:
     # Step 3: pass raw data + rule-based pre-assessment to Claude
     # If Claude fails for any reason, fall back to the rule-based result
     try:
-        return await _claude_enhance(request_data, rule_based)
+        return await _claude_enhance(request_data)
     except Exception as e:
         import traceback
         print(f"[ai_service] Claude enhance failed, falling back to rule-based.")
@@ -357,25 +334,22 @@ async def reconcile_medication(request_data: dict) -> dict:
         return rule_based
 
 
-async def _claude_enhance_quality(request_data: dict, rule_based: dict) -> dict:
+async def _claude_enhance_quality(request_data: dict) -> dict:
     api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is required when USE_MOCK_AI=false")
 
     print("[ai_service] Calling Anthropic Claude API for data quality...")
-    print("[ai_service] Input data:", json.dumps({
-        "patient_record": request_data,
-        "rule_based_pre_assessment": {k: v for k, v in rule_based.items() if k != "overall_score"},
-    }, indent=2))
 
     system_prompt = DATA_QUALITY_SYSTEM_PROMPT
 
-    rule_based_without_score = {k: v for k, v in rule_based.items() if k != "overall_score"}
+    # Send only raw patient record — no rule-based pre-assessment.
+    # Rule-based output is kept as a silent fallback only (used if Claude fails entirely).
+    # Sending rule-based scores would anchor Claude to hardcoded rules that cannot
+    # generalise across cases with different fields and clinical profiles.
+    user_message = json.dumps({"patient_record": request_data}, indent=2)
 
-    user_message = json.dumps({
-        "patient_record": request_data,
-        "rule_based_pre_assessment": rule_based_without_score,
-    }, indent=2)
+    print("[ai_service] Input data:", user_message)
 
     payload = {
         "model": os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
@@ -418,15 +392,15 @@ async def _claude_enhance_quality(request_data: dict, rule_based: dict) -> dict:
     print("[ai_service] Claude quality parsed result:", parsed)
 
     return {
-        "overall_score": int(parsed.get("overall_score", rule_based["overall_score"])),
+        "overall_score": int(parsed["overall_score"]),
         "breakdown": {
-            "completeness":          int(parsed.get("breakdown", {}).get("completeness",          rule_based["breakdown"]["completeness"])),
-            "accuracy":              int(parsed.get("breakdown", {}).get("accuracy",              rule_based["breakdown"]["accuracy"])),
-            "timeliness":            int(parsed.get("breakdown", {}).get("timeliness",            rule_based["breakdown"]["timeliness"])),
-            "clinical_plausibility": int(parsed.get("breakdown", {}).get("clinical_plausibility", rule_based["breakdown"]["clinical_plausibility"])),
+            "completeness":          int(parsed["breakdown"]["completeness"]),
+            "accuracy":              int(parsed["breakdown"]["accuracy"]),
+            "timeliness":            int(parsed["breakdown"]["timeliness"]),
+            "clinical_plausibility": int(parsed["breakdown"]["clinical_plausibility"]),
         },
-        "issues_detected": parsed.get("issues_detected", rule_based["issues_detected"]),
-        "summary": parsed.get("summary", ""),
+        "issues_detected": parsed["issues_detected"],
+        "summary": parsed["summary"],
     }
 
 
@@ -440,7 +414,7 @@ async def validate_data_quality(request_data: dict) -> dict:
 
     # Step 3: enhance with Claude; fall back to rule-based on any failure
     try:
-        return await _claude_enhance_quality(request_data, rule_based)
+        return await _claude_enhance_quality(request_data)
     except Exception as e:
         import traceback
         print(f"[ai_service] Claude quality enhance failed, falling back to rule-based.")

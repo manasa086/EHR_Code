@@ -8,15 +8,16 @@ service files.
 
 # ── Medication Reconciliation ─────────────────────────────────────────────────
 
-RECONCILIATION_SYSTEM_PROMPT = """You are a clinical pharmacist reviewing a medication reconciliation case.
+RECONCILIATION_SYSTEM_PROMPT = """You are a clinical pharmacist performing medication reconciliation.
 
-A rule-based engine has already analysed the data and produced a pre-assessment (without a confidence score).
+You will receive raw patient data including medication sources from different healthcare systems.
 Your job is to:
-1. Validate or challenge the rule-based medication selection using clinical judgement
-2. Write clear, human-readable reasoning a clinician would find useful
-3. Determine your own confidence score (0.0 - 1.0) based on: source agreement, recency, reliability, and patient context
-4. Add any clinically important recommended actions the rules may have missed
-5. Set clinical_safety_check to PASSED, NEEDS_REVIEW, or FAILED
+1. Analyse all medication sources independently — consider recency, source reliability, and conflicts
+2. Select the most clinically appropriate reconciled medication using your own clinical judgement
+3. Write clear, human-readable reasoning a clinician would find useful
+4. Determine a confidence score (0.0 - 1.0) based on: source agreement, recency, reliability, and patient context
+5. List all clinically important recommended actions
+6. Assess ALL lab values in recent_labs and set clinical_safety_check to PASSED, NEEDS_REVIEW, or FAILED
 
 Return ONLY valid JSON with exactly this shape:
 {
@@ -32,11 +33,10 @@ Return ONLY valid JSON with exactly this shape:
 
 DATA_QUALITY_SYSTEM_PROMPT = """You are a clinical data quality specialist reviewing an EHR patient record.
 
-A rule-based engine has already scored the record across four dimensions and flagged issues.
-Your job is to:
-1. Validate or challenge the rule-based scores using clinical judgement
-2. Detect additional data quality issues the rules may have missed
-3. Reassign an overall_score (0–100) and dimension scores based on your assessment
+You will receive raw patient record data. Your job is to:
+1. Independently score the record across four dimensions: completeness, accuracy, timeliness, clinical_plausibility
+2. Detect all data quality issues — missing fields, implausible values, outdated records, clinical inconsistencies
+3. Assign an overall_score (0–100) and individual dimension scores based solely on your own assessment
 4. Write a brief summary explaining the quality assessment
 5. Prioritise the issues by clinical impact
 

@@ -463,6 +463,15 @@ def main():
             f"Conflicting medication records across {len(sources)} systems."
         )
 
+        # Derive unique medication names from all sources (preserving order)
+        seen_meds: set = set()
+        medications: list = []
+        for src in sources:
+            med = src.get("medication", "").strip()
+            if med and med not in seen_meds:
+                medications.append(med)
+                seen_meds.add(med)
+
         case = {
             "id": f"case_{case_num:03d}",
             "label": label,
@@ -473,6 +482,7 @@ def main():
                 "recent_labs": labs if labs else {"eGFR": 75},
             },
             "sources": sources,
+            "medications": medications,
             "demographics": demographics,
             "allergies": allergies,
             "vital_signs": vital_signs,

@@ -42,3 +42,11 @@ def test_breakdown_contains_all_four_dimensions():
 def test_complete_recent_record_scores_above_70():
     result = _mock_data_quality(complete_record(last_updated="2025-10-01"))
     assert result["overall_score"] >= 70
+
+
+def test_clinical_plausibility_is_neutral_in_fallback():
+    # The rule-based fallback cannot assess clinical plausibility across
+    # arbitrary conditions and medications, so it always returns 50 (neutral).
+    # Real clinical plausibility scoring is done exclusively by Claude.
+    result = _mock_data_quality(complete_record())
+    assert result["breakdown"]["clinical_plausibility"] == 50

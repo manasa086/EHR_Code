@@ -17,6 +17,7 @@ const EMPTY_FORM = {
   dob: "",
   gender: "",
   // Clinical details
+  medications: "",
   allergies: "",
   blood_pressure: "",
   heart_rate: "",
@@ -41,6 +42,7 @@ function caseToForm(c) {
     dob:    c.demographics?.dob    ?? "",
     gender: c.demographics?.gender ?? "",
     // Clinical details
+    medications:    (c.medications ?? []).join(", "),
     allergies:      (c.allergies ?? []).join(", "),
     blood_pressure: String(c.vital_signs?.blood_pressure ?? ""),
     heart_rate:     String(c.vital_signs?.heart_rate     ?? ""),
@@ -71,6 +73,7 @@ function formToCase(form, existingId) {
       dob:    form.dob    || null,
       gender: form.gender || null,
     },
+    medications: form.medications.split(",").map((m) => m.trim()).filter(Boolean),
     allergies: form.allergies.split(",").map((a) => a.trim()).filter(Boolean),
     vital_signs: {
       blood_pressure: form.blood_pressure || null,
@@ -390,6 +393,11 @@ function CaseEditForm({ initial, onSave, onCancel, saving }) {
       {/* Clinical Details */}
       <section className="bg-gray-50 rounded-xl p-4 space-y-3">
         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Clinical Details</h3>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Medications (comma-separated)</label>
+          <input value={form.medications} onChange={(e) => set("medications", e.target.value)}
+            placeholder="Metformin 500mg, Lisinopril 10mg" className={inputCls} />
+        </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Allergies (comma-separated)</label>
           <input value={form.allergies} onChange={(e) => set("allergies", e.target.value)}

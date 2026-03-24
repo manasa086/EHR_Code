@@ -4,6 +4,10 @@ Tests for Claude integration paths in ai_service:
 - Timeout / network error → falls back to rule-based
 - Invalid JSON from Claude → falls back to rule-based
 - Missing API key → RuntimeError raised
+- Confidence score clamping to 0.0–1.0
+
+Claude functions now take only raw request_data — no rule-based pre-assessment is passed.
+The rule-based result is used only as a silent fallback when Claude fails entirely.
 """
 import json
 import pytest
@@ -31,10 +35,11 @@ RECONCILE_DATA = {
     ],
 }
 
-RULE_BASED = {
+# Used only as a base for building Claude reply dicts in tests — not passed to Claude functions
+CLAUDE_RECONCILE_REPLY = {
     "reconciled_medication": "Warfarin 7.5mg",
     "confidence_score": 0.75,
-    "reasoning": "Rule-based reasoning.",
+    "reasoning": "Most recent high-reliability source.",
     "recommended_actions": ["Confirm with patient"],
     "clinical_safety_check": "PASSED",
 }
@@ -48,10 +53,12 @@ QUALITY_DATA = {
     "last_updated": "2025-01-01",
 }
 
-RULE_BASED_QUALITY = {
+# Used only as a base for building Claude reply dicts in tests — not passed to Claude functions
+CLAUDE_QUALITY_REPLY = {
     "overall_score": 72,
     "breakdown": {"completeness": 80, "accuracy": 100, "timeliness": 65, "clinical_plausibility": 80},
     "issues_detected": [],
+    "summary": "Record is mostly complete with good accuracy.",
 }
 
 
@@ -80,7 +87,7 @@ async def test_claude_enhance_returns_parsed_result():
 
     with patch("services.ai_service.os.getenv", return_value="test-api-key"), \
          patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-        result = await _claude_enhance(RECONCILE_DATA, RULE_BASED)
+        result = await _claude_enhance(RECONCILE_DATA)
 
     assert result["reconciled_medication"] == "Warfarin 5mg"
     assert result["confidence_score"] == 0.62
@@ -89,24 +96,24 @@ async def test_claude_enhance_returns_parsed_result():
 
 @pytest.mark.asyncio
 async def test_claude_enhance_clamps_confidence_score_above_1():
-    claude_reply = {**RULE_BASED, "confidence_score": 1.5}
+    claude_reply = {**CLAUDE_RECONCILE_REPLY, "confidence_score": 1.5}
     mock_response = make_mock_response(claude_reply)
 
     with patch("services.ai_service.os.getenv", return_value="test-api-key"), \
          patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-        result = await _claude_enhance(RECONCILE_DATA, RULE_BASED)
+        result = await _claude_enhance(RECONCILE_DATA)
 
     assert result["confidence_score"] <= 1.0
 
 
 @pytest.mark.asyncio
 async def test_claude_enhance_clamps_confidence_score_below_0():
-    claude_reply = {**RULE_BASED, "confidence_score": -0.5}
+    claude_reply = {**CLAUDE_RECONCILE_REPLY, "confidence_score": -0.5}
     mock_response = make_mock_response(claude_reply)
 
     with patch("services.ai_service.os.getenv", return_value="test-api-key"), \
          patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-        result = await _claude_enhance(RECONCILE_DATA, RULE_BASED)
+        result = await _claude_enhance(RECONCILE_DATA)
 
     assert result["confidence_score"] >= 0.0
 
@@ -115,7 +122,7 @@ async def test_claude_enhance_clamps_confidence_score_below_0():
 async def test_claude_enhance_raises_without_api_key():
     with patch("services.ai_service.os.getenv", return_value=""):
         with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
-            await _claude_enhance(RECONCILE_DATA, RULE_BASED)
+            await _claude_enhance(RECONCILE_DATA)
 
 
 @pytest.mark.asyncio
@@ -127,7 +134,7 @@ async def test_claude_enhance_raises_on_invalid_json():
     with patch("services.ai_service.os.getenv", return_value="test-api-key"), \
          patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
         with pytest.raises(Exception):
-            await _claude_enhance(RECONCILE_DATA, RULE_BASED)
+            await _claude_enhance(RECONCILE_DATA)
 
 
 # ── reconcile_medication (public interface) ───────────────────────────────────
@@ -142,7 +149,7 @@ async def test_reconcile_medication_uses_mock_when_flag_is_true():
 
 @pytest.mark.asyncio
 async def test_reconcile_medication_calls_claude_when_mock_is_false():
-    claude_reply = {**RULE_BASED, "confidence_score": 0.55}
+    claude_reply = {**CLAUDE_RECONCILE_REPLY, "confidence_score": 0.55}
     mock_response = make_mock_response(claude_reply)
 
     with patch("services.ai_service.USE_MOCK", False), \
@@ -190,7 +197,7 @@ async def test_claude_enhance_quality_returns_parsed_result():
 
     with patch("services.ai_service.os.getenv", return_value="test-api-key"), \
          patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-        result = await _claude_enhance_quality(QUALITY_DATA, RULE_BASED_QUALITY)
+        result = await _claude_enhance_quality(QUALITY_DATA)
 
     assert result["overall_score"] == 68
     assert result["summary"] == "Record is moderately complete but allergy documentation is missing."
@@ -201,7 +208,7 @@ async def test_claude_enhance_quality_returns_parsed_result():
 async def test_claude_enhance_quality_raises_without_api_key():
     with patch("services.ai_service.os.getenv", return_value=""):
         with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
-            await _claude_enhance_quality(QUALITY_DATA, RULE_BASED_QUALITY)
+            await _claude_enhance_quality(QUALITY_DATA)
 
 
 # ── validate_data_quality (public interface) ──────────────────────────────────
