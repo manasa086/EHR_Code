@@ -161,13 +161,13 @@ The rule-based engine always runs first and produces a guaranteed valid result. 
 
 **Why:** Sending the rule-based output to Claude would anchor its decisions to hardcoded rules that assume specific lab names and medication patterns, producing wrong results for cases that don't match those assumptions. Claude must form its own clinical judgement from raw data only. The rule-based engine exists solely to ensure the system is never blocked by AI unavailability.
 
-**Trade-off:** Two compute steps per request. Mitigated by the in-memory cache — identical requests return instantly without touching Claude at all.
+**Trade-off:** Two compute steps per request. Mitigated by the in-memory cache identical requests return instantly without touching Claude at all.
 
 ### 2. Rule-based output entirely excluded from Claude's input
 
 No rule-based data is passed to Claude. Claude receives only the raw request payload (`patient_data` for reconciliation, `patient_record` for data quality). All output fields,  `reconciled_medication`, `confidence_score`, `clinical_safety_check`, `reasoning`, `recommended_actions`, `overall_score`, `breakdown`, `issues_detected`, `summary` which come exclusively from Claude's own response.
 
-**Why:** Even passing partial rule-based output (e.g. just the confidence score) causes Claude to anchor to it rather than form an independent assessment. A real second opinion requires Claude to see only the raw clinical data — nothing pre-computed.
+**Why:** Even passing partial rule-based output (e.g. just the confidence score) causes Claude to anchor to it rather than form an independent assessment. A real second opinion requires Claude to see only the raw clinical data, nothing pre-computed.
 
 ### 3. SHA-256 in-memory cache keyed on full request payload
 
