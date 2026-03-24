@@ -209,13 +209,13 @@ Every request and response is a Pydantic `BaseModel`. This gives automatic 422 v
 Currently decisions survive in memory until the server restarts. PostgreSQL with SQLAlchemy would give a full audit trail, enable analytics on approval rates per case, and feed decision history back into confidence calibration.
 
 **2. Confidence calibration from historical decisions.**
-When clinicians consistently reject reconciliations from a particular source system, that system's reliability weight should decrease automatically. The data is being collected the feedback loop isn't wired yet.
+When clinicians consistently reject reconciliations from a particular source system, that system's reliability weight should decrease automatically. Currently approve/reject decisions are stored in memory only and reset on server restart, so the feedback loop cannot persist across sessions yet.
 
 **3. Fuzzy medication name matching.**
-"Aspirin", "ASA", and "Acetylsalicylic acid" are the same drug. The current reconciliation engine does exact string comparison. A fuzzy matcher (e.g. RxNorm API lookup or token-set ratio) would catch these cross-system naming differences.
+Different hospitals often write the same drug in completely different ways as "Aspirin", "ASA", and "Acetylsalicylic acid" are all the same medication, but the current engine treats them as three separate drugs because it compares names as plain text. A fuzzy matching approach, like looking up names against the RxNorm drug database or using a similarity score, would recognise these as the same drug and reconcile them correctly across systems.
 
 **4. Claude structured output (tool use).**
-Instead of `"Return ONLY valid JSON"` in the system prompt, use Claude's native tool/function calling to enforce the JSON schema at the API level. This removes the need for defensive `find("{")` / `rfind("}")` parsing.
+Right now we tell Claude to return valid JSON through a plain text instruction in the system prompt. Claude usually follows it, but it is just a request, not a guarantee. If Claude ever wraps the response in a markdown code block or adds a sentence before the JSON, the code has to manually scan for the opening and closing braces to extract it. Using Claude's native tool/function calling would let us define the exact schema we expect upfront, and the API would enforce it, no defensive parsing needed, and no risk of malformed output slipping through.
 
 **5. User authentication and multi-tenancy.**
 Right now there is one API key for all users. A proper auth layer (JWT, OAuth) would give per-user audit trails, role-based access (clinician vs. pharmacist vs. admin), and the ability to scope decisions to individual users.
